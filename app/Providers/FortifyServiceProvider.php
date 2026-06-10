@@ -13,6 +13,8 @@ use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -32,6 +34,21 @@ class FortifyServiceProvider extends ServiceProvider
         $this->configureActions();
         $this->configureViews();
         $this->configureRateLimiting();
+
+        Fortify::authenticateUsing(function (Request $request) {
+        $user = User::where('username', $request->username)
+            ->where('is_active', true)
+            ->first();
+
+        if (
+            $user &&
+            Hash::check($request->password, $user->password)
+        ) {
+            return $user;
+        }
+
+        return null;
+    });
     }
 
     /**
@@ -53,15 +70,15 @@ class FortifyServiceProvider extends ServiceProvider
             'status' => $request->session()->get('status'),
         ]));
 
-        Fortify::resetPasswordView(fn (Request $request) => Inertia::render('auth/ResetPassword', [
-            'email' => $request->email,
-            'token' => $request->route('token'),
-            'passwordRules' => Password::defaults()->toPasswordRulesString(),
-        ]));
+        // Fortify::resetPasswordView(fn (Request $request) => Inertia::render('auth/ResetPassword', [
+        //     'email' => $request->email,
+        //     'token' => $request->route('token'),
+        //     'passwordRules' => Password::defaults()->toPasswordRulesString(),
+        // ]));
 
-        Fortify::requestPasswordResetLinkView(fn (Request $request) => Inertia::render('auth/ForgotPassword', [
-            'status' => $request->session()->get('status'),
-        ]));
+        // Fortify::requestPasswordResetLinkView(fn (Request $request) => Inertia::render('auth/ForgotPassword', [
+        //     'status' => $request->session()->get('status'),
+        // ]));
 
         Fortify::registerView(fn () => Inertia::render('auth/Register', [
             'passwordRules' => Password::defaults()->toPasswordRulesString(),

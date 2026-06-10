@@ -12,7 +12,7 @@ class KodeItemController extends Controller
      */
     public function index()
     {
-        // 
+        dd(KodeItem::all());
     }
 
     /**
