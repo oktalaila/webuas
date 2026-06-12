@@ -12,7 +12,7 @@ use App\Http\Controllers\MutasiStokController;
 Route::inertia('/', 'Welcome')->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::inertia('dashboard', 'Dashboard')->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::resource('items', ItemController::class);
     Route::resource('transaksi', TransaksiController::class);
     Route::get('/mutasi-stok', [MutasiStokController::class, 'index']);
