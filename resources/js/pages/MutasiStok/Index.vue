@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
 defineOptions({
     layout: {
@@ -11,13 +11,19 @@ defineOptions({
     },
 });
 
-// Data dummy sementara
 const mutasiStok = ref([
     { id: 1, kode_item: 'KOI-001', nama_item: 'Koi Kohaku', jenis_mutasi: 'masuk', jumlah: 10, stok_sebelum: 0, stok_sesudah: 10, keterangan: 'Stok awal', created_at: '2026-06-12' },
     { id: 2, kode_item: 'KOI-001', nama_item: 'Koi Kohaku', jenis_mutasi: 'keluar', jumlah: 2, stok_sebelum: 10, stok_sesudah: 8, keterangan: 'Terjual', created_at: '2026-06-13' },
     { id: 3, kode_item: 'KOI-002', nama_item: 'Koi Showa', jenis_mutasi: 'masuk', jumlah: 8, stok_sebelum: 0, stok_sesudah: 8, keterangan: 'Stok awal', created_at: '2026-06-12' },
     { id: 4, kode_item: 'PKN-001', nama_item: 'Pakan Koi Premium', jenis_mutasi: 'keluar', jumlah: 5, stok_sebelum: 20, stok_sesudah: 15, keterangan: 'Terjual', created_at: '2026-06-14' },
 ]);
+
+const filterJenis = ref('semua');
+
+const filtered = computed(() => {
+    if (filterJenis.value === 'semua') return mutasiStok.value;
+    return mutasiStok.value.filter(m => m.jenis_mutasi === filterJenis.value);
+});
 </script>
 
 <template>
@@ -27,6 +33,11 @@ const mutasiStok = ref([
         <!-- Header -->
         <div class="flex items-center justify-between">
             <h1 class="text-2xl font-bold">Mutasi Stok</h1>
+            <select v-model="filterJenis" class="border rounded-lg px-3 py-2 text-sm">
+                <option value="semua">Semua</option>
+                <option value="masuk">Masuk</option>
+                <option value="keluar">Keluar</option>
+            </select>
         </div>
 
         <!-- Tabel -->
@@ -46,7 +57,7 @@ const mutasiStok = ref([
                 </thead>
                 <tbody>
                     <tr
-                        v-for="mutasi in mutasiStok"
+                        v-for="mutasi in filtered"
                         :key="mutasi.id"
                         class="border-t border-sidebar-border/70 dark:border-sidebar-border hover:bg-gray-50 dark:hover:bg-gray-800"
                     >
@@ -67,6 +78,9 @@ const mutasiStok = ref([
                         <td class="px-4 py-3">{{ mutasi.stok_sesudah }}</td>
                         <td class="px-4 py-3 text-muted-foreground">{{ mutasi.keterangan }}</td>
                         <td class="px-4 py-3">{{ mutasi.created_at }}</td>
+                    </tr>
+                    <tr v-if="filtered.length === 0">
+                        <td colspan="8" class="px-4 py-6 text-center text-muted-foreground">Tidak ada data</td>
                     </tr>
                 </tbody>
             </table>
