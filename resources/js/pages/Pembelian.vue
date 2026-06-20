@@ -3,10 +3,11 @@ import { Head, useForm } from '@inertiajs/vue3';
 
 const props = defineProps<{
     item: {
-        id: number;
-        nama_item: string;
-        harga_jual: number;
-        stok: number;
+        id: number
+        kode: string
+        nama_item: string
+        harga_jual: number
+        stok: number
     };
 }>();
 

@@ -22,42 +22,59 @@ class PembelianController extends Controller
     }
 
     /**
-     * Proses submit pembelian — langsung "selesai", tanpa approval
+     * Proses submit pembelian
      */
     public function store(Request $request, Item $item)
     {
         $validated = $request->validate([
-            'qty' => ['required', 'integer', 'min:1', 'max:' . $item->stok],
+            'qty' => ['required', 'integer', 'min:1'],
         ]);
 
-        $transaksi = DB::transaction(function () use ($validated, $item) {
-            $subtotal = $item->harga_jual * $validated['qty'];
+        try {
+            $transaksi = DB::transaction(function () use ($validated, $item) {
 
-            $transaksi = Transaksi::create([
-                'nomor_invoice'     => 'INV-' . strtoupper(uniqid()),
-                'user_id'           => Auth::id(),
-                'sumber'            => 'online',
-                'status'            => 'selesai',
-                'total_harga'       => $subtotal,
-                'bayar'             => $subtotal,
-                'kembalian'         => 0,
-                'tanggal_transaksi' => now(),
+                // Kunci row item dulu sebelum cek stok
+                // Ini cegah dua request masuk bersamaan (race condition)
+                $item = Item::lockForUpdate()->find($item->id);
+
+                // Validasi stok di dalam transaksi DB, bukan di luar
+                if ($validated['qty'] > $item->stok) {
+                    throw new \Exception('Stok tidak mencukupi.');
+                }
+
+                $subtotal = $item->harga_jual * $validated['qty'];
+
+                $transaksi = Transaksi::create([
+                    'nomor_invoice'     => 'INV-' . strtoupper(uniqid()),
+                    'user_id'           => Auth::id(),
+                    'sumber'            => 'online',
+                    'status'            => 'selesai',
+                    'total_harga'       => $subtotal,
+                    'bayar'             => $subtotal,
+                    'kembalian'         => 0,
+                    'tanggal_transaksi' => now(),
+                ]);
+
+                $transaksi->detailTransaksi()->create([
+                    'item_id'   => $item->id,
+                    'nama_item' => $item->nama_item,
+                    'harga'     => $item->harga_jual,
+                    'qty'       => $validated['qty'],
+                ]);
+
+                $item->decrement('stok', $validated['qty']);
+
+                return $transaksi;
+            });
+
+            return redirect()->route('struk.show', $transaksi)
+                ->with('success', "Pembelian berhasil! No. Invoice: {$transaksi->nomor_invoice}");
+
+        } catch (\Exception $e) {
+            return back()->withErrors([
+                'qty' => $e->getMessage(),
             ]);
-
-            $transaksi->detailTransaksi()->create([
-                'item_id'   => $item->id,
-                'nama_item' => $item->nama_item,
-                'harga'     => $item->harga_jual,
-                'qty'       => $validated['qty'],
-            ]);
-
-            $item->decrement('stok', $validated['qty']);
-
-            return $transaksi;
-        });
-
-        return redirect()->route('struk.show', $transaksi)
-            ->with('success', "Pembelian berhasil! No. Invoice: {$transaksi->nomor_invoice}");
+        }
     }
 
     /**

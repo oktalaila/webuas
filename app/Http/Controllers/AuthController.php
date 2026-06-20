@@ -27,7 +27,7 @@ class AuthController extends Controller
     }
 
     /**
-     * PROSES LOGIN (Lampu Lalu Lintas)
+     * PROSES LOGIN
      */
     public function login(Request $request)
     {
@@ -38,63 +38,69 @@ class AuthController extends Controller
         ]);
 
         // 2. Coba cocokkan dengan database
-        if (Auth::attempt(['username' => $credentials['username'], 'password' => $credentials['password'], 'is_active' => true])) {
-            
+        if (Auth::attempt([
+            'username' => $credentials['username'],
+            'password' => $credentials['password'],
+            'is_active' => true,
+        ])) {
             $request->session()->regenerate();
             $role = Auth::user()->role;
 
-            // 3. LAMPU LALU LINTAS: Pisahkan rute berdasarkan jabatan
-            if ($role === 'admin' || $role === 'pegawai') {
-                return redirect()->intended('/dashboard');
+            // 3. Redirect berdasarkan role
+            if ($role === 'admin') {
+                return redirect('/dashboard');
             }
 
-            // Jika pembeli, kembalikan ke Katalog Depan
+            if ($role === 'pegawai') {
+                return redirect('/dashboard');
+            }
+
+            // Pembeli → balik ke halaman yang dituju sebelum login
             return redirect()->intended('/');
         }
 
-        // Jika salah password / username
+        // Jika gagal login
         return back()->withErrors([
             'username' => 'Username atau password yang Anda masukkan salah.',
         ]);
     }
 
     /**
-     * PROSES REGISTER (Pendaftaran Pembeli Baru)
+     * PROSES REGISTER
      */
     public function register(Request $request)
     {
-        // 1. Validasi input pendaftaran
+        // 1. Validasi input
         $validated = $request->validate([
-            'nama' => ['required', 'string', 'max:255'],
+            'nama'     => ['required', 'string', 'max:255'],
             'username' => ['required', 'string', 'max:255', 'unique:users,username'],
             'password' => ['required', 'string', 'min:6'],
         ]);
 
-        // 2. Ciptakan akun baru (otomatis diberi kasta 'pembeli')
+        // 2. Buat akun baru, otomatis role pembeli
         $user = User::create([
-            'nama' => $validated['nama'],
-            'username' => $validated['username'],
-            'password' => Hash::make($validated['password']),
-            'role' => 'pembeli',
+            'nama'      => $validated['nama'],
+            'username'  => $validated['username'],
+            'password'  => Hash::make($validated['password']),
+            'role'      => 'pembeli',
             'is_active' => true,
         ]);
 
-        // 3. Langsung loginkan pembeli tersebut dan lempar ke Katalog
+        // 3. Langsung login dan arahkan ke katalog
         Auth::login($user);
         return redirect('/');
     }
 
     /**
-     * PROSES LOGOUT (Cabut Kunci Akses)
+     * PROSES LOGOUT
      */
     public function logout(Request $request)
     {
         Auth::logout();
-        
+
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        // Setelah keluar, kembalikan menjadi tamu di halaman depan
         return redirect('/');
     }
 }

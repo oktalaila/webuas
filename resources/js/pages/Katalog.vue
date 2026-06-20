@@ -22,10 +22,21 @@ const page = usePage();
 const showLoginModal = ref(false);
 
 function handleBeli(itemId: number) {
-    if (!page.props.auth.user) {
+    const user = page.props.auth.user;
+
+    // Belum login → tampilkan modal
+    if (!user) {
         showLoginModal.value = true;
         return;
     }
+
+    // Admin/pegawai → tidak boleh checkout, arahkan ke dashboard
+    if (user.role !== 'pembeli') {
+        router.visit('/dashboard');
+        return;
+    }
+
+    // Pembeli → lanjut ke checkout
     router.visit(`/checkout/${itemId}`);
 }
 </script>
@@ -55,11 +66,20 @@ function handleBeli(itemId: number) {
                         Halo, {{ $page.props.auth.user.nama || $page.props.auth.user.username }}!
                     </span>
 
-                    <Link v-if="$page.props.auth.user.role !== 'pembeli'" href="/dashboard" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-700">
+                    <Link
+                        v-if="$page.props.auth.user.role !== 'pembeli'"
+                        href="/dashboard"
+                        class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-700"
+                    >
                         Dashboard Kasir
                     </Link>
 
-                    <Link href="/logout" method="post" as="button" class="text-red-600 hover:text-red-800 font-medium text-sm border border-red-200 px-4 py-2 rounded-lg hover:bg-red-50">
+                    <Link
+                        href="/logout"
+                        method="post"
+                        as="button"
+                        class="text-red-600 hover:text-red-800 font-medium text-sm border border-red-200 px-4 py-2 rounded-lg hover:bg-red-50"
+                    >
                         Keluar
                     </Link>
                 </template>
@@ -90,12 +110,23 @@ function handleBeli(itemId: number) {
                         <div class="text-xl font-black text-green-600 mb-4">
                             Rp {{ ikan.harga_jual.toLocaleString('id-ID') }}
                         </div>
+
+                        <!-- Tombol hanya muncul untuk tamu atau pembeli -->
                         <button
+                            v-if="!$page.props.auth.user || $page.props.auth.user.role === 'pembeli'"
                             @click="handleBeli(ikan.id)"
                             class="w-full bg-black text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-800"
                         >
                             Beli Sekarang
                         </button>
+
+                        <!-- Label untuk admin/pegawai -->
+                        <div
+                            v-else
+                            class="w-full bg-gray-100 text-gray-400 px-4 py-2 rounded-lg text-sm font-medium text-center"
+                        >
+                            Produk tersedia
+                        </div>
                     </div>
                 </div>
 
