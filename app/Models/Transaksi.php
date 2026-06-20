@@ -19,14 +19,16 @@ class Transaksi extends Model
      * Mass assignable attributes
      */
     protected $fillable = [
-        'nomor_invoice',
-        'user_id',
-        'total_harga',
-        'bayar',
-        'kembalian',
-        'tanggal_transaksi',
-        'created_at',
-    ];
+    'nomor_invoice',
+    'user_id',
+    'sumber',        // tambah ini
+    'status',        // tambah ini
+    'total_harga',
+    'bayar',
+    'kembalian',
+    'tanggal_transaksi',
+    'created_at',
+   ];
 
     /**
      * Type casting
