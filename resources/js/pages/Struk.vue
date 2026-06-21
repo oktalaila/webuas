@@ -28,34 +28,83 @@ defineProps<{
 <template>
     <Head title="Struk Pembelian" />
 
-    <div class="min-h-screen bg-gray-50 flex items-center justify-center px-6 py-12">
-        <div class="w-full max-w-md bg-white border border-gray-200 rounded-2xl p-8">
-            <div class="text-center mb-6">
-                <div class="text-5xl mb-2">✅</div>
-                <h1 class="text-xl font-bold">Pembelian Berhasil!</h1>
-                <p class="text-gray-500 text-sm">{{ transaksi.nomor_invoice }}</p>
-            </div>
+    <div class="min-h-screen flex items-center justify-center px-6 py-12"
+        style="background: #f8f9ff; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;">
 
-            <div class="border-t border-b border-dashed border-gray-300 py-4 my-4">
-                <div v-for="d in transaksi.detail_transaksi" :key="d.nama_item" class="flex justify-between text-sm mb-2">
-                    <span>{{ d.nama_item }} x{{ d.qty }}</span>
-                    <span>Rp {{ Number(d.subtotal).toLocaleString('id-ID') }}</span>
+        <div style="width: 100%; max-width: 420px;">
+
+            <!-- Card struk -->
+            <div style="background: #fff; border: 1px solid #bfc8c9; border-radius: 16px; overflow: hidden;">
+
+                <!-- Header sukses -->
+                <div style="background: linear-gradient(135deg, #004349 0%, #0d6b73 100%); padding: 32px; text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 8px;">✅</div>
+                    <h1 style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 4px;">Pembelian Berhasil!</h1>
+                    <p style="font-size: 0.8rem; color: #a8d8dc; font-family: monospace;">{{ transaksi.nomor_invoice }}</p>
+                </div>
+
+                <!-- Body struk -->
+                <div style="padding: 24px;">
+
+                    <!-- Info pembeli -->
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #3f484a; margin-bottom: 16px;">
+                        <span>Pembeli</span>
+                        <span style="font-weight: 600; color: #0b1c30;">{{ transaksi.user?.nama || transaksi.user?.username }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #3f484a; margin-bottom: 16px;">
+                        <span>Tanggal</span>
+                        <span style="font-weight: 600; color: #0b1c30;">
+                            {{ new Date(transaksi.tanggal_transaksi).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) }}
+                        </span>
+                    </div>
+
+                    <!-- Garis putus -->
+                    <div style="border-top: 2px dashed #e5eeff; margin: 16px 0;"></div>
+
+                    <!-- Detail item -->
+                    <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+                        <div
+                            v-for="d in transaksi.detail_transaksi"
+                            :key="d.id"
+                            style="display: flex; justify-content: space-between; font-size: 0.875rem;"
+                        >
+                            <span style="color: #3f484a;">{{ d.nama_item }} <span style="color: #90a4b4;">x{{ d.qty }}</span></span>
+                            <span style="font-weight: 600; color: #0b1c30;">Rp {{ Number(d.subtotal).toLocaleString('id-ID') }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Garis putus -->
+                    <div style="border-top: 2px dashed #e5eeff; margin: 16px 0;"></div>
+
+                    <!-- Total -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span style="font-size: 1rem; font-weight: 700; color: #0b1c30;">Total</span>
+                        <span style="font-size: 1.2rem; font-weight: 800; color: #004349;">
+                            Rp {{ Number(transaksi.total_harga).toLocaleString('id-ID') }}
+                        </span>
+                    </div>
+
+                    <!-- Tombol aksi -->
+                    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 24px;">
+                        <Link
+                            href="/pesanan-saya"
+                            style="background: #004349; color: #fff; text-align: center; padding: 12px; border-radius: 8px; font-size: 0.875rem; font-weight: 600; display: block; text-decoration: none;"
+                            class="hover:opacity-90 transition-opacity"
+                        >
+                            Lihat Pesanan Saya
+                        </Link>
+                        <Link
+                            href="/"
+                            style="border: 1px solid #bfc8c9; color: #0b1c30; text-align: center; padding: 12px; border-radius: 8px; font-size: 0.875rem; font-weight: 600; display: block; text-decoration: none;"
+                            class="hover:bg-[#f8f9ff] transition-colors"
+                        >
+                            Kembali ke Katalog
+                        </Link>
+                    </div>
+
                 </div>
             </div>
 
-            <div class="flex justify-between font-bold text-lg mb-6">
-                <span>Total</span>
-                <span>Rp {{ Number(transaksi.total_harga).toLocaleString('id-ID') }}</span>
-            </div>
-
-            <div class="flex flex-col gap-2">
-                <Link href="/pesanan-saya" class="bg-black text-white text-center py-2 rounded-lg text-sm font-bold">
-                    Lihat Pesanan Saya
-                </Link>
-                <Link href="/" class="border border-gray-300 text-center py-2 rounded-lg text-sm font-bold">
-                    Kembali ke Katalog
-                </Link>
-            </div>
         </div>
     </div>
 </template>

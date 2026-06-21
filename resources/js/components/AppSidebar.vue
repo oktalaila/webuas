@@ -50,6 +50,7 @@ const footerNavItems: NavItem[] = [];
 
 <template>
     <Sidebar collapsible="icon" variant="inset">
+
         <SidebarHeader>
             <SidebarMenu>
                 <SidebarMenuItem>
@@ -61,13 +62,16 @@ const footerNavItems: NavItem[] = [];
                 </SidebarMenuItem>
             </SidebarMenu>
         </SidebarHeader>
+
         <SidebarContent>
             <NavMain :items="mainNavItems" />
         </SidebarContent>
+
         <SidebarFooter>
             <NavFooter :items="footerNavItems" />
             <NavUser />
         </SidebarFooter>
+
     </Sidebar>
     <slot />
 </template>

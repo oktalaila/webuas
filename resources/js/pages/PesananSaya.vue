@@ -3,16 +3,17 @@ import { Head, Link } from '@inertiajs/vue3';
 
 defineProps<{
     transaksi: Array<{
-        id: number
-        nomor_invoice: string
-        total_harga: number
-        tanggal_transaksi: string
-        status: string
+        id: number;
+        nomor_invoice: string;
+        total_harga: number;
+        tanggal_transaksi: string;
+        status: string;
         detail_transaksi: Array<{
-            id: number
-            nama_item: string
-            harga: number
-            qty: number
+            id: number;
+            nama_item: string;
+            harga: number;
+            qty: number;
+        }>;
     }>;
 }>();
 </script>

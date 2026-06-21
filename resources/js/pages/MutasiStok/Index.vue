@@ -19,65 +19,80 @@ const filterJenis = ref('semua');
 
 const filtered = computed(() => {
     if (filterJenis.value === 'semua') return props.mutasiStok;
-    return props.mutasiStok.filter((m: any) => m.jenis_mutasi === filterJenis.value);
+    return props.mutasiStok?.filter((m: any) => m.jenis_mutasi === filterJenis.value);
 });
 </script>
 
 <template>
     <Head title="Mutasi Stok" />
-    <div class="flex flex-col gap-4 p-4">
+    <div class="flex flex-col gap-5 p-6" style="font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;">
 
         <!-- Header -->
         <div class="flex items-center justify-between">
-            <h1 class="text-2xl font-bold">Mutasi Stok</h1>
-            <select v-model="filterJenis" class="border rounded-lg px-3 py-2 text-sm">
-                <option value="semua">Semua</option>
-                <option value="masuk">Masuk</option>
-                <option value="keluar">Keluar</option>
+            <div>
+                <h1 style="font-size: 1.5rem; font-weight: 700; color: #0b1c30;">Mutasi Stok</h1>
+                <p style="font-size: 0.85rem; color: #3f484a; margin-top: 2px;">Riwayat perubahan stok masuk dan keluar</p>
+            </div>
+            <select
+                v-model="filterJenis"
+                style="border: 1px solid #bfc8c9; border-radius: 8px; padding: 8px 14px; font-size: 0.875rem; color: #0b1c30; outline: none; background: #fff; cursor: pointer;"
+            >
+                <option value="semua">Semua Jenis</option>
+                <option value="masuk">↑ Masuk</option>
+                <option value="keluar">↓ Keluar</option>
             </select>
         </div>
 
         <!-- Tabel -->
-        <div class="rounded-xl border border-sidebar-border/70 dark:border-sidebar-border bg-white dark:bg-sidebar overflow-hidden">
-            <table class="w-full text-sm">
-                <thead class="bg-gray-50 dark:bg-gray-800">
-                    <tr class="text-left text-muted-foreground">
-                        <th class="px-4 py-3 font-medium">Kode Item</th>
-                        <th class="px-4 py-3 font-medium">Nama Item</th>
-                        <th class="px-4 py-3 font-medium">Jenis</th>
-                        <th class="px-4 py-3 font-medium">Jumlah</th>
-                        <th class="px-4 py-3 font-medium">Stok Sebelum</th>
-                        <th class="px-4 py-3 font-medium">Stok Sesudah</th>
-                        <th class="px-4 py-3 font-medium">Keterangan</th>
-                        <th class="px-4 py-3 font-medium">Tanggal</th>
+        <div style="background: #fff; border: 1px solid #bfc8c9; border-radius: 12px; overflow: hidden;">
+            <table class="w-full" style="font-size: 0.875rem; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #eff4ff;">
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #3f484a; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em;">Kode Item</th>
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #3f484a; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em;">Nama Item</th>
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #3f484a; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em;">Jenis</th>
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #3f484a; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em;">Jumlah</th>
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #3f484a; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em;">Stok Sebelum</th>
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #3f484a; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em;">Stok Sesudah</th>
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #3f484a; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em;">Keterangan</th>
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #3f484a; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em;">Tanggal</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr
                         v-for="mutasi in filtered"
                         :key="mutasi.id"
-                        class="border-t border-sidebar-border/70 dark:border-sidebar-border hover:bg-gray-50 dark:hover:bg-gray-800"
+                        style="border-top: 1px solid #e5eeff; transition: background 0.15s;"
+                        class="hover:bg-[#f8f9ff]"
                     >
-                        <td class="px-4 py-3 font-medium">{{ mutasi.kode_item }}</td>
-                        <td class="px-4 py-3">{{ mutasi.nama_item }}</td>
-                        <td class="px-4 py-3">
+                        <td style="padding: 12px 16px;">
+                            <span style="background: #dce9ff; color: #004349; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; font-family: monospace;">
+                                {{ mutasi.kode_item }}
+                            </span>
+                        </td>
+                        <td style="padding: 12px 16px; font-weight: 600; color: #0b1c30;">{{ mutasi.nama_item }}</td>
+                        <td style="padding: 12px 16px;">
                             <span
-                                :class="mutasi.jenis_mutasi === 'masuk'
-                                    ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
-                                    : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'"
-                                class="px-2 py-1 rounded-full text-xs font-medium"
+                                :style="mutasi.jenis_mutasi === 'masuk'
+                                    ? 'background: #dce9ff; color: #004349;'
+                                    : 'background: #ffdad6; color: #ba1a1a;'"
+                                style="padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;"
                             >
                                 {{ mutasi.jenis_mutasi === 'masuk' ? '↑ Masuk' : '↓ Keluar' }}
                             </span>
                         </td>
-                        <td class="px-4 py-3">{{ mutasi.jumlah }}</td>
-                        <td class="px-4 py-3">{{ mutasi.stok_sebelum }}</td>
-                        <td class="px-4 py-3">{{ mutasi.stok_sesudah }}</td>
-                        <td class="px-4 py-3 text-muted-foreground">{{ mutasi.keterangan }}</td>
-                        <td class="px-4 py-3">{{ mutasi.created_at }}</td>
+                        <td style="padding: 12px 16px; font-weight: 700; color: #0b1c30;">{{ mutasi.jumlah }}</td>
+                        <td style="padding: 12px 16px; color: #3f484a;">{{ mutasi.stok_sebelum }}</td>
+                        <td style="padding: 12px 16px; color: #3f484a;">{{ mutasi.stok_sesudah }}</td>
+                        <td style="padding: 12px 16px; color: #90a4b4; font-size: 0.8rem;">{{ mutasi.keterangan }}</td>
+                        <td style="padding: 12px 16px; color: #3f484a; font-size: 0.8rem;">
+                            {{ new Date(mutasi.created_at).toLocaleDateString('id-ID') }}
+                        </td>
                     </tr>
-                    <tr v-if="filtered.length === 0">
-                        <td colspan="8" class="px-4 py-6 text-center text-muted-foreground">Tidak ada data</td>
+                    <tr v-if="!filtered || filtered.length === 0">
+                        <td colspan="8" style="padding: 40px; text-align: center; color: #90a4b4;">
+                            Tidak ada data mutasi stok.
+                        </td>
                     </tr>
                 </tbody>
             </table>

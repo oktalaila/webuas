@@ -16,14 +16,14 @@ defineProps<{
 
 defineOptions({
     layout: {
-        title: 'Buat Akun',
-        description: 'Isi data di bawah untuk mendaftar sebagai pembeli',
+        title: 'Buat Akun Pembeli',
+        description: 'Daftar untuk mulai berbelanja ikan koi pilihan',
     },
 });
 </script>
 
 <template>
-    <Head title="Register" />
+    <Head title="Daftar" />
 
     <Form
         v-bind="store.form()"
@@ -31,9 +31,9 @@ defineOptions({
         v-slot="{ errors, processing }"
         class="flex flex-col gap-6"
     >
-        <div class="grid gap-6">
+        <div class="grid gap-5">
             <div class="grid gap-2">
-                <Label for="nama">Nama</Label>
+                <Label for="nama" style="font-size: 0.85rem; font-weight: 600; color: #3f484a;">Nama Lengkap</Label>
                 <Input
                     id="nama"
                     type="text"
@@ -42,13 +42,14 @@ defineOptions({
                     :tabindex="1"
                     autocomplete="name"
                     name="nama"
-                    placeholder="Nama lengkap"
+                    placeholder="Nama lengkap kamu"
+                    style="border-color: #bfc8c9; border-radius: 8px;"
                 />
                 <InputError :message="errors.nama" />
             </div>
 
             <div class="grid gap-2">
-                <Label for="username">Username</Label>
+                <Label for="username" style="font-size: 0.85rem; font-weight: 600; color: #3f484a;">Username</Label>
                 <Input
                     id="username"
                     type="text"
@@ -56,21 +57,23 @@ defineOptions({
                     :tabindex="2"
                     autocomplete="username"
                     name="username"
-                    placeholder="Username"
+                    placeholder="Pilih username unikmu"
+                    style="border-color: #bfc8c9; border-radius: 8px;"
                 />
                 <InputError :message="errors.username" />
             </div>
 
             <div class="grid gap-2">
-                <Label for="password">Password</Label>
+                <Label for="password" style="font-size: 0.85rem; font-weight: 600; color: #3f484a;">Password</Label>
                 <PasswordInput
                     id="password"
                     required
                     :tabindex="3"
                     autocomplete="new-password"
                     name="password"
-                    placeholder="Password"
+                    placeholder="Buat password yang kuat"
                     :passwordrules="passwordRules"
+                    style="border-color: #bfc8c9; border-radius: 8px;"
                 />
                 <InputError :message="errors.password" />
             </div>
@@ -81,15 +84,18 @@ defineOptions({
                 tabindex="4"
                 :disabled="processing"
                 data-test="register-user-button"
+                style="background: #004349; border-radius: 8px; font-weight: 600; font-size: 0.9rem;"
             >
                 <Spinner v-if="processing" />
                 Buat Akun
             </Button>
         </div>
 
-        <div class="text-center text-sm text-muted-foreground">
+        <div style="text-align: center; font-size: 0.875rem; color: #3f484a;">
             Sudah punya akun?
-            <TextLink :href="login()" class="underline underline-offset-4" :tabindex="5">Masuk</TextLink>
+            <TextLink :href="login()" style="color: #004349; font-weight: 600; text-decoration: underline;" :tabindex="5">
+                Masuk di sini
+            </TextLink>
         </div>
     </Form>
 </template>

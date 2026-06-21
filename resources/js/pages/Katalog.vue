@@ -15,7 +15,7 @@ defineProps<{
         nama_item: string;
         harga_jual: number;
         stok: number;
-    }>;
+    }>();
 }>();
 
 const page = usePage();
@@ -24,19 +24,16 @@ const showLoginModal = ref(false);
 function handleBeli(itemId: number) {
     const user = page.props.auth.user;
 
-    // Belum login → tampilkan modal
     if (!user) {
         showLoginModal.value = true;
         return;
     }
 
-    // Admin/pegawai → tidak boleh checkout, arahkan ke dashboard
     if (user.role !== 'pembeli') {
         router.visit('/dashboard');
         return;
     }
 
-    // Pembeli → lanjut ke checkout
     router.visit(`/checkout/${itemId}`);
 }
 </script>
@@ -44,41 +41,56 @@ function handleBeli(itemId: number) {
 <template>
     <Head title="Toko Ikan Koi" />
 
-    <div class="min-h-screen bg-white text-gray-900 flex flex-col font-sans">
+    <div class="min-h-screen flex flex-col" style="background: #f8f9ff; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; color: #0b1c30;">
 
-        <nav class="flex items-center justify-between px-8 py-4 border-b border-gray-200">
-            <div class="flex items-center gap-2 font-bold text-lg">
-                🐟 Toko Ikan Koi
+        <!-- Navbar -->
+        <nav style="background: #ffffff; border-bottom: 1px solid #bfc8c9;" class="flex items-center justify-between px-8 py-4">
+            <div class="flex items-center gap-3">
+                <div style="background: #004349; border-radius: 10px; width: 36px; height: 36px;" class="flex items-center justify-center text-white text-lg">
+                    🎏
+                </div>
+                <span style="font-weight: 700; font-size: 1.1rem; color: #004349;">Toko Ikan Koi</span>
             </div>
 
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-3">
                 <template v-if="!$page.props.auth.user">
-                    <Link href="/login" class="text-gray-600 hover:text-black font-medium text-sm">
+                    <Link href="/login" style="color: #3f484a; font-size: 0.875rem; font-weight: 500;" class="hover:opacity-70">
                         Masuk
                     </Link>
-                    <Link href="/register" class="bg-black text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-800">
+                    <Link href="/register" style="background: #004349; color: #fff; padding: 8px 18px; border-radius: 8px; font-size: 0.875rem; font-weight: 600;" class="hover:opacity-90 transition-opacity">
                         Daftar
                     </Link>
                 </template>
 
                 <template v-else>
-                    <span class="text-sm font-medium text-gray-600">
+                    <span style="font-size: 0.875rem; font-weight: 500; color: #3f484a;">
                         Halo, {{ $page.props.auth.user.nama || $page.props.auth.user.username }}!
                     </span>
 
                     <Link
                         v-if="$page.props.auth.user.role !== 'pembeli'"
                         href="/dashboard"
-                        class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-700"
+                        style="background: #004349; color: #fff; padding: 8px 16px; border-radius: 8px; font-size: 0.875rem; font-weight: 600;"
+                        class="hover:opacity-90 transition-opacity"
                     >
-                        Dashboard Kasir
+                        Dashboard
+                    </Link>
+
+                    <Link
+                        v-if="$page.props.auth.user.role === 'pembeli'"
+                        href="/pesanan-saya"
+                        style="color: #004349; font-size: 0.875rem; font-weight: 500; border: 1px solid #bfc8c9; padding: 7px 14px; border-radius: 8px;"
+                        class="hover:opacity-70 transition-opacity"
+                    >
+                        Pesanan Saya
                     </Link>
 
                     <Link
                         href="/logout"
                         method="post"
                         as="button"
-                        class="text-red-600 hover:text-red-800 font-medium text-sm border border-red-200 px-4 py-2 rounded-lg hover:bg-red-50"
+                        style="color: #ba1a1a; font-size: 0.875rem; font-weight: 500; border: 1px solid #ffdad6; padding: 7px 14px; border-radius: 8px;"
+                        class="hover:opacity-80 transition-opacity"
                     >
                         Keluar
                     </Link>
@@ -86,71 +98,107 @@ function handleBeli(itemId: number) {
             </div>
         </nav>
 
-        <div class="flex flex-col items-center justify-center text-center px-6 pt-20 pb-12 gap-6">
-            <div class="text-6xl">🐠</div>
-            <h1 class="text-4xl font-black tracking-tight">Katalog Ikan Koi Pilihan</h1>
-            <p class="text-gray-500 text-lg max-w-md">
+        <!-- Hero -->
+        <div class="flex flex-col items-center justify-center text-center px-6 pt-16 pb-10 gap-4">
+            <div style="background: #dce9ff; border-radius: 50%; width: 72px; height: 72px;" class="flex items-center justify-center text-4xl mb-2">
+                🐠
+            </div>
+            <h1 style="font-size: 2.25rem; font-weight: 800; color: #0b1c30; letter-spacing: -0.02em;">
+                Katalog Ikan Koi Pilihan
+            </h1>
+            <p style="color: #3f484a; font-size: 1rem; max-width: 420px; line-height: 1.6;">
                 Pilih dan temukan ikan koi impianmu dengan kualitas terbaik langsung dari kolam kami.
             </p>
         </div>
 
+        <!-- Grid Produk -->
         <div class="px-8 pb-20 max-w-6xl mx-auto w-full flex-1">
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
 
                 <div
                     v-for="ikan in katalogIkan"
                     :key="ikan.id"
-                    class="border border-gray-200 rounded-2xl p-6 flex flex-col items-center text-center hover:shadow-xl transition-shadow duration-300"
+                    style="background: #ffffff; border: 1px solid #bfc8c9; border-radius: 16px; overflow: hidden; transition: box-shadow 0.2s;"
+                    class="flex flex-col hover:shadow-lg"
                 >
-                    <div class="text-6xl mb-4 bg-gray-50 w-full py-6 rounded-xl">🎏</div>
-                    <h3 class="font-bold text-lg mb-1">{{ ikan.nama_item }}</h3>
-                    <p class="text-xs font-mono text-gray-500 mb-4">Sisa Stok: {{ ikan.stok }} ekor</p>
+                    <!-- Gambar placeholder -->
+                    <div style="background: linear-gradient(135deg, #dce9ff 0%, #e5eeff 100%); padding: 28px 0;" class="flex items-center justify-center text-5xl">
+                        🎏
+                    </div>
 
-                    <div class="w-full mt-auto">
-                        <div class="text-xl font-black text-green-600 mb-4">
+                    <!-- Info -->
+                    <div class="flex flex-col flex-1 p-4 gap-3">
+                        <div>
+                            <h3 style="font-weight: 700; font-size: 0.95rem; color: #0b1c30; margin-bottom: 2px;">{{ ikan.nama_item }}</h3>
+                            <p style="font-size: 0.75rem; color: #3f484a;">
+                                Sisa stok:
+                                <span :style="ikan.stok <= 3 ? 'color: #ba1a1a; font-weight: 600;' : 'color: #004349; font-weight: 600;'">
+                                    {{ ikan.stok }} ekor
+                                </span>
+                            </p>
+                        </div>
+
+                        <div style="font-size: 1.2rem; font-weight: 800; color: #004349;">
                             Rp {{ ikan.harga_jual.toLocaleString('id-ID') }}
                         </div>
 
-                        <!-- Tombol hanya muncul untuk tamu atau pembeli -->
-                        <button
-                            v-if="!$page.props.auth.user || $page.props.auth.user.role === 'pembeli'"
-                            @click="handleBeli(ikan.id)"
-                            class="w-full bg-black text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-800"
-                        >
-                            Beli Sekarang
-                        </button>
+                        <div class="mt-auto">
+                            <!-- Tombol beli untuk tamu/pembeli -->
+                            <button
+                                v-if="!$page.props.auth.user || $page.props.auth.user.role === 'pembeli'"
+                                @click="handleBeli(ikan.id)"
+                                :disabled="ikan.stok === 0"
+                                :style="ikan.stok === 0
+                                    ? 'background: #e5eeff; color: #90a4b4; cursor: not-allowed;'
+                                    : 'background: #004349; color: #fff; cursor: pointer;'"
+                                style="width: 100%; padding: 9px; border-radius: 8px; font-size: 0.875rem; font-weight: 600; border: none; transition: opacity 0.2s;"
+                                class="hover:opacity-90"
+                            >
+                                {{ ikan.stok === 0 ? 'Stok Habis' : 'Beli Sekarang' }}
+                            </button>
 
-                        <!-- Label untuk admin/pegawai -->
-                        <div
-                            v-else
-                            class="w-full bg-gray-100 text-gray-400 px-4 py-2 rounded-lg text-sm font-medium text-center"
-                        >
-                            Produk tersedia
+                            <!-- Label untuk admin/pegawai -->
+                            <div
+                                v-else
+                                style="width: 100%; background: #e5eeff; color: #3f484a; padding: 9px; border-radius: 8px; font-size: 0.875rem; font-weight: 500; text-align: center;"
+                            >
+                                Produk tersedia
+                            </div>
                         </div>
                     </div>
                 </div>
 
             </div>
 
-            <div v-if="katalogIkan.length === 0" class="text-center py-12 text-gray-400 font-medium">
-                Mohon maaf, stok ikan sedang kosong saat ini.
+            <!-- Empty state -->
+            <div v-if="katalogIkan.length === 0" class="text-center py-16">
+                <div class="text-5xl mb-4">🪣</div>
+                <p style="color: #3f484a; font-size: 1rem; font-weight: 500;">Mohon maaf, stok ikan sedang kosong saat ini.</p>
             </div>
         </div>
 
-        <footer class="text-center text-sm text-gray-400 py-6 border-t border-gray-100">
+        <!-- Footer -->
+        <footer style="border-top: 1px solid #bfc8c9; padding: 20px; text-align: center; font-size: 0.8rem; color: #3f484a;">
             © 2026 Toko Ikan Koi. All rights reserved.
         </footer>
 
         <!-- Modal: wajib login dulu -->
-        <div v-if="showLoginModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
-            <div class="bg-white rounded-2xl p-6 max-w-sm w-full text-center">
-                <h3 class="font-bold text-lg mb-2">Login Diperlukan</h3>
-                <p class="text-gray-500 text-sm mb-5">Silakan masuk atau daftar dulu untuk membeli ikan koi ini.</p>
+        <div v-if="showLoginModal" class="fixed inset-0 flex items-center justify-center z-50 px-4" style="background: rgba(11,28,48,0.5);">
+            <div style="background: #fff; border-radius: 20px; padding: 28px; max-width: 360px; width: 100%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
+                <div class="text-4xl mb-3">🔐</div>
+                <h3 style="font-weight: 700; font-size: 1.1rem; color: #0b1c30; margin-bottom: 8px;">Login Diperlukan</h3>
+                <p style="color: #3f484a; font-size: 0.875rem; margin-bottom: 20px; line-height: 1.5;">
+                    Silakan masuk atau daftar dulu untuk membeli ikan koi ini.
+                </p>
                 <div class="flex gap-2">
-                    <Link href="/login" class="flex-1 bg-black text-white py-2 rounded-lg text-sm font-bold">Masuk</Link>
-                    <Link href="/register" class="flex-1 border border-gray-300 py-2 rounded-lg text-sm font-bold">Daftar</Link>
+                    <Link href="/login" style="flex: 1; background: #004349; color: #fff; padding: 10px; border-radius: 8px; font-size: 0.875rem; font-weight: 600; text-align: center; display: block;">
+                        Masuk
+                    </Link>
+                    <Link href="/register" style="flex: 1; border: 1px solid #bfc8c9; color: #0b1c30; padding: 10px; border-radius: 8px; font-size: 0.875rem; font-weight: 600; text-align: center; display: block;">
+                        Daftar
+                    </Link>
                 </div>
-                <button @click="showLoginModal = false" class="mt-3 text-xs text-gray-400 hover:text-gray-600">
+                <button @click="showLoginModal = false" style="margin-top: 12px; font-size: 0.75rem; color: #90a4b4;" class="hover:opacity-70">
                     Batal
                 </button>
             </div>
