@@ -8,14 +8,18 @@ export default {
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
+// 1. Membuat Cetak Biru (Interface) untuk data ikan
+interface Ikan {
+    id: number;
+    kode: string;
+    nama_item: string;
+    harga_jual: number;
+    stok: number;
+}
+
+// 2. Menerapkan Cetak Biru ke dalam defineProps
 defineProps<{
-    katalogIkan: Array<{
-        id: number;
-        kode: string;
-        nama_item: string;
-        harga_jual: number;
-        stok: number;
-    }>();
+    katalogIkan: Ikan[];
 }>();
 
 const page = usePage();
@@ -43,7 +47,6 @@ function handleBeli(itemId: number) {
 
     <div class="min-h-screen flex flex-col" style="background: #f8f9ff; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; color: #0b1c30;">
 
-        <!-- Navbar -->
         <nav style="background: #ffffff; border-bottom: 1px solid #bfc8c9;" class="flex items-center justify-between px-8 py-4">
             <div class="flex items-center gap-3">
                 <div style="background: #004349; border-radius: 10px; width: 36px; height: 36px;" class="flex items-center justify-center text-white text-lg">
@@ -98,7 +101,6 @@ function handleBeli(itemId: number) {
             </div>
         </nav>
 
-        <!-- Hero -->
         <div class="flex flex-col items-center justify-center text-center px-6 pt-16 pb-10 gap-4">
             <div style="background: #dce9ff; border-radius: 50%; width: 72px; height: 72px;" class="flex items-center justify-center text-4xl mb-2">
                 🐠
@@ -111,7 +113,6 @@ function handleBeli(itemId: number) {
             </p>
         </div>
 
-        <!-- Grid Produk -->
         <div class="px-8 pb-20 max-w-6xl mx-auto w-full flex-1">
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
 
@@ -121,12 +122,10 @@ function handleBeli(itemId: number) {
                     style="background: #ffffff; border: 1px solid #bfc8c9; border-radius: 16px; overflow: hidden; transition: box-shadow 0.2s;"
                     class="flex flex-col hover:shadow-lg"
                 >
-                    <!-- Gambar placeholder -->
                     <div style="background: linear-gradient(135deg, #dce9ff 0%, #e5eeff 100%); padding: 28px 0;" class="flex items-center justify-center text-5xl">
                         🎏
                     </div>
 
-                    <!-- Info -->
                     <div class="flex flex-col flex-1 p-4 gap-3">
                         <div>
                             <h3 style="font-weight: 700; font-size: 0.95rem; color: #0b1c30; margin-bottom: 2px;">{{ ikan.nama_item }}</h3>
@@ -143,7 +142,6 @@ function handleBeli(itemId: number) {
                         </div>
 
                         <div class="mt-auto">
-                            <!-- Tombol beli untuk tamu/pembeli -->
                             <button
                                 v-if="!$page.props.auth.user || $page.props.auth.user.role === 'pembeli'"
                                 @click="handleBeli(ikan.id)"
@@ -157,7 +155,6 @@ function handleBeli(itemId: number) {
                                 {{ ikan.stok === 0 ? 'Stok Habis' : 'Beli Sekarang' }}
                             </button>
 
-                            <!-- Label untuk admin/pegawai -->
                             <div
                                 v-else
                                 style="width: 100%; background: #e5eeff; color: #3f484a; padding: 9px; border-radius: 8px; font-size: 0.875rem; font-weight: 500; text-align: center;"
@@ -170,19 +167,16 @@ function handleBeli(itemId: number) {
 
             </div>
 
-            <!-- Empty state -->
             <div v-if="katalogIkan.length === 0" class="text-center py-16">
                 <div class="text-5xl mb-4">🪣</div>
                 <p style="color: #3f484a; font-size: 1rem; font-weight: 500;">Mohon maaf, stok ikan sedang kosong saat ini.</p>
             </div>
         </div>
 
-        <!-- Footer -->
         <footer style="border-top: 1px solid #bfc8c9; padding: 20px; text-align: center; font-size: 0.8rem; color: #3f484a;">
             © 2026 Toko Ikan Koi. All rights reserved.
         </footer>
 
-        <!-- Modal: wajib login dulu -->
         <div v-if="showLoginModal" class="fixed inset-0 flex items-center justify-center z-50 px-4" style="background: rgba(11,28,48,0.5);">
             <div style="background: #fff; border-radius: 20px; padding: 28px; max-width: 360px; width: 100%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
                 <div class="text-4xl mb-3">🔐</div>
