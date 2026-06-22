@@ -24,16 +24,16 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // ─── 3. ZONA PEMBELI ──────────────────────────────────────────
-// Hanya pembeli yang boleh checkout — admin/pegawai dilarang
 Route::middleware(['auth', 'role:pembeli'])->group(function () {
-    Route::get('/checkout/{item}',      [PembelianController::class, 'create'])->name('checkout.create');
-    Route::post('/checkout/{item}',     [PembelianController::class, 'store'])->name('checkout.store');
-    Route::get('/struk/{transaksi}',    [PembelianController::class, 'struk'])->name('struk.show');
-    Route::get('/pesanan-saya',         [PembelianController::class, 'riwayat'])->name('pesanan.index');
+    Route::get('/checkout/{item}',          [PembelianController::class, 'create'])->name('checkout.create');
+    Route::post('/checkout/{item}',         [PembelianController::class, 'store'])->name('checkout.store');
+    Route::get('/pembayaran/{transaksi}',   [PembelianController::class, 'pembayaran'])->name('pembayaran.show');
+    Route::post('/pembayaran/{transaksi}/konfirmasi', [PembelianController::class, 'konfirmasiTransfer'])->name('pembayaran.konfirmasi');
+    Route::get('/struk/{transaksi}',        [PembelianController::class, 'struk'])->name('struk.show');
+    Route::get('/pesanan-saya',             [PembelianController::class, 'riwayat'])->name('pesanan.index');
 });
 
 // ─── 4. ZONA BACK-OFFICE ─────────────────────────────────────
-// Hapus 'verified' — tidak perlu verifikasi email untuk sistem internal
 Route::middleware(['auth', 'role:admin,pegawai'])->group(function () {
     Route::get('/dashboard',            [DashboardController::class, 'index'])->name('dashboard');
     Route::resource('items',            ItemController::class);

@@ -22,7 +22,7 @@ class PembelianController extends Controller
     }
 
     /**
-     * Proses submit pembelian
+     * Proses submit pembelian — status awal: menunggu_pembayaran
      */
     public function store(Request $request, Item $item)
     {
@@ -33,24 +33,24 @@ class PembelianController extends Controller
         try {
             $transaksi = DB::transaction(function () use ($validated, $item) {
 
-                // Kunci row item dulu sebelum cek stok
-                // Ini cegah dua request masuk bersamaan (race condition)
                 $item = Item::lockForUpdate()->find($item->id);
 
-                // Validasi stok di dalam transaksi DB, bukan di luar
                 if ($validated['qty'] > $item->stok) {
                     throw new \Exception('Stok tidak mencukupi.');
                 }
 
                 $subtotal = $item->harga_jual * $validated['qty'];
 
+                // Nominal unik: tambah angka random 1-999 biar mudah diverifikasi
+                $nominal_unik = $subtotal + rand(1, 999);
+
                 $transaksi = Transaksi::create([
                     'nomor_invoice'     => 'INV-' . strtoupper(uniqid()),
                     'user_id'           => Auth::id(),
                     'sumber'            => 'online',
-                    'status'            => 'selesai',
-                    'total_harga'       => $subtotal,
-                    'bayar'             => $subtotal,
+                    'status'            => 'menunggu_pembayaran',
+                    'total_harga'       => $nominal_unik,
+                    'bayar'             => 0,
                     'kembalian'         => 0,
                     'tanggal_transaksi' => now(),
                 ]);
@@ -62,13 +62,13 @@ class PembelianController extends Controller
                     'qty'       => $validated['qty'],
                 ]);
 
-                $item->decrement('stok', $validated['qty']);
+                // Stok BELUM dikurangi — dikurangi setelah pembayaran dikonfirmasi
 
                 return $transaksi;
             });
 
-            return redirect()->route('struk.show', $transaksi)
-                ->with('success', "Pembelian berhasil! No. Invoice: {$transaksi->nomor_invoice}");
+            return redirect()->route('pembayaran.show', $transaksi->id)
+                ->with('success', "Pesanan dibuat! Silakan selesaikan pembayaran.");
 
         } catch (\Exception $e) {
             return back()->withErrors([
@@ -78,11 +78,63 @@ class PembelianController extends Controller
     }
 
     /**
-     * Tampilkan struk/invoice 1 transaksi
+     * Halaman instruksi pembayaran
+     */
+    public function pembayaran(Transaksi $transaksi)
+    {
+        if ($transaksi->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $transaksi->load('detailTransaksi');
+
+        return Inertia::render('Pembayaran', [
+            'transaksi' => $transaksi,
+        ]);
+    }
+
+    /**
+     * Konfirmasi "Saya Sudah Transfer" — potong stok & ubah status
+     */
+    public function konfirmasiTransfer(Transaksi $transaksi)
+    {
+        if ($transaksi->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        if ($transaksi->status !== 'menunggu_pembayaran') {
+            return back()->withErrors(['error' => 'Transaksi ini sudah diproses.']);
+        }
+
+        DB::transaction(function () use ($transaksi) {
+            $transaksi->load('detailTransaksi');
+
+            // Potong stok setelah konfirmasi transfer
+            foreach ($transaksi->detailTransaksi as $detail) {
+                $item = Item::lockForUpdate()->find($detail->item_id);
+                if ($item) {
+                    if ($item->stok < $detail->qty) {
+                        throw new \Exception("Stok {$item->nama_item} tidak mencukupi saat konfirmasi.");
+                    }
+                    $item->decrement('stok', $detail->qty);
+                }
+            }
+
+            $transaksi->update([
+                'status' => 'menunggu_konfirmasi',
+                'bayar'  => $transaksi->total_harga,
+            ]);
+        });
+
+        return redirect()->route('pesanan.index')
+            ->with('success', 'Konfirmasi transfer berhasil! Pesanan sedang diverifikasi admin.');
+    }
+
+    /**
+     * Tampilkan struk/invoice
      */
     public function struk(Transaksi $transaksi)
     {
-        // Hanya pemilik transaksi atau admin/pegawai yang boleh lihat
         if ($transaksi->user_id !== Auth::id() && !in_array(Auth::user()->role, ['admin', 'pegawai'])) {
             abort(403, 'Anda tidak berhak melihat struk ini.');
         }
