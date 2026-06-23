@@ -27,9 +27,14 @@ function getImageName(namaItem: string): string {
     if (namaItem.includes('Premium')) return 'pakan-premium.jpg';
     if (namaItem.includes('Growth')) return 'pakan-growth.png';
     if (namaItem.includes('Jaring')) return 'jaring-koi.jpg';
-    if (namaItem.includes('Aerator')) return 'aerator.jpg';
+    if (namaItem.includes('Aerator')) return 'aerator.jpeg';
     if (namaItem.includes('Vitamin')) return 'vitamin-koi.jpg';
     if (namaItem.includes('Jamur')) return 'obat-jamur.jpg';
+    if (namaItem.includes('Kohaku')) return 'koi-kohaku.jpg';
+    if (namaItem.includes('Showa')) return 'koi-showa.jpg';
+    if (namaItem.includes('Ogon')) return 'koi-ogon.jpg';
+    if (namaItem.includes('Bekko')) return 'koi-bekko.jpg';
+    if (namaItem.includes('Tanco')) return 'koi-tanco.jpg';
     return 'pakan-premium.jpg';
 }
 </script>
